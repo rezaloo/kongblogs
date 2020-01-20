@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloapi
+  labels:
+    app: helloapi
+spec:
+  ports:
+    - port: 8080
+      name: high
+      protocol: TCP
+      targetPort: 8082
+    - port: 80
+      name: low
+      protocol: TCP
+      targetPort: 8082
+  selector:
+    app: helloapi
+    tier: frontend
+  type: LoadBalancer
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: helloapi
+  labels:
+    app: helloapi
+spec:
+  selector:
+    matchLabels:
+      app: helloapi
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: helloapi
+        tier: frontend
+    spec:
+      containers:
+        - image: rezaloo/helloapi
+          name: helloapi
+          ports:
+            - containerPort: 8082
+              name: helloapi
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: helloapi
+  annotations:
+    plugins.konghq.com: rl-by-ip, httpbin-auth
+#spec:
+#  rules:
+#  - http:
+#      paths:
+#      - path: /hello
+#        backend:
+#          serviceName: helloapi
+#          servicePort: 80
+spec:
+   backend:
+     serviceName: helloapi
+     servicePort: 80
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: mb1
+username: mobby
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongCredential
+metadata:
+  name: mobby-apikey
+consumerRef: mb1
+type: key-auth
+config:
+  key: key42
