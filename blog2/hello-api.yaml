@@ -51,18 +51,14 @@ metadata:
   name: helloapi
   annotations:
     plugins.konghq.com: rl-by-ip, httpbin-auth
-#spec:
-#  rules:
-#  - http:
-#      paths:
-#      - path: /hello
-#        backend:
-#          serviceName: helloapi
-#          servicePort: 80
 spec:
-   backend:
-     serviceName: helloapi
-     servicePort: 80
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: helloapi
+          servicePort: 80
 ---
 apiVersion: configuration.konghq.com/v1
 kind: KongConsumer
